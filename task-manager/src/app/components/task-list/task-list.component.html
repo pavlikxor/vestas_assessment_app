@@ -1,0 +1,26 @@
+@if(showConfirm&&taskToDelete){
+<app-confirm-modal [message]="'Are you sure you want to delete the task: ' + taskToDelete.name + '?'"
+    (confirmed)="handleDelete()" (cancelled)="closeConfirmModal()">
+</app-confirm-modal>}
+
+@if(showTaskModal){
+<app-task-form-modal [task]="taskBeingEdited" (closeModal)="closeTaskModal()">
+</app-task-form-modal>
+}
+
+@for(task of taskStoreService.filteredTasks(); track $index){
+<div class="p-4 border rounded bg-gray-50">
+    <h3 class="text-lg font-semibold">{{ task.name }}</h3>
+    <p>{{ task.description }}</p>
+    <p class="text-sm text-gray-500">Status: {{ task.status }} | Created: {{ task.createdAt | date }}</p>
+    <div class="mt-2 space-x-2">
+        @if(task.status === 'Todo'){
+        <button (click)="taskStoreService.updateStatus(task.id, 'InProgress')" class="btn">Start</button>}
+        @if(task.status === 'InProgress'){
+        <button (click)="taskStoreService.updateStatus(task.id, 'Completed')" class="btn">Complete</button>}
+        <button (click)="openTaskModal(task)" class="btn btn-danger">Edit</button>
+        <button (click)="confirmDelete(task)" class="btn btn-danger">
+            Delete
+        </button>
+    </div>
+</div>}
