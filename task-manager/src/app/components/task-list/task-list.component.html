@@ -1,8 +1,4 @@
 
-@if(showTaskModal){
-<app-task-form-modal [task]="taskBeingEdited" (closeModal)="closeTaskModal()">
-</app-task-form-modal>
-}
 
 @for(task of taskStoreService.tasks(); track $index){
 <div class="p-4 border rounded bg-gray-50">
@@ -16,7 +12,7 @@
         @if(task.status === 'InProgress'){
         <button (click)="updateStatus(task.id, 'Completed')" class="btn">Complete</button>
         }
-        <button (click)="openTaskModal(task)" class="btn btn-danger">Edit</button>
+        <button (click)="handleEdit(task)" class="btn btn-danger">Edit</button>
         <button (click)="handleDelete(task)" class="btn btn-danger">
             Delete
         </button>

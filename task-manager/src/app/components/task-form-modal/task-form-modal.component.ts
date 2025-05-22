@@ -1,18 +1,16 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Task } from '../../models/task.model';
-import { TaskStoreService } from '../../services/task-store.service';
+import { CreateTask, TaskFormModalService } from './task-form-modal.service';
 
 @Component({
   selector: 'app-task-form-modal',
   imports: [ReactiveFormsModule],
   templateUrl: './task-form-modal.component.html',
-  styleUrl: './task-form-modal.component.scss'
 })
 export class TaskFormModalComponent {
-  task = input<Task | null>(null)
-  closeModal = output<void>();
-
+  isOpen = signal(false);
+  task = signal<Task | null>(null);
   nameControl = new FormControl<string | null>(null, Validators.required)
   descriptionControl = new FormControl<string | null>(null)
   taskForm = new FormGroup({
@@ -20,15 +18,20 @@ export class TaskFormModalComponent {
     description: this.descriptionControl
   })
 
-  private taskStoreService = inject(TaskStoreService)
+  private taskFormModalService = inject(TaskFormModalService);
 
   ngOnInit() {
-    const currentTask = this.task();
-
-    this.taskForm.reset({ name: currentTask?.name || null, description: currentTask?.description || null });
+    this.taskFormModalService.data$.subscribe((data) => {
+      this.isOpen.set(!!data);
+      if (data?.task) {
+        this.task.set(data.task);
+        this.taskForm.reset({ name: data.task.name, description: data.task.description || null });
+      }
+    });
   }
 
-  save() {
+
+  onSave() {
     const task = this.task();
     const formValue = this.taskForm.value;
     const name = formValue.name?.trim()
@@ -39,22 +42,26 @@ export class TaskFormModalComponent {
           name,
           description: formValue.description?.trim()
         };
-        this.taskStoreService.updateTask(updatedTask);
+        this.taskFormModalService.close(updatedTask);
       } else {
-        const newTask: Task = {
-          id: crypto.randomUUID(),
+        const newTask: CreateTask = {
           name,
           description: formValue.description?.trim(),
-          status: 'Todo',
-          createdAt: new Date().toISOString()
         };
-        this.taskStoreService.addTask(newTask);
+        this.taskFormModalService.close(newTask);
       }
-
-      this.close();
+      this.resetModal()
     }
   }
-  close() {
-    this.closeModal.emit();
+
+  onCancel() {
+    this.taskFormModalService.close(false);
+    this.resetModal()
+  }
+
+  private resetModal() {
+    this.isOpen.set(false);
+    this.taskForm.reset();
+    this.task.set(null);
   }
 }

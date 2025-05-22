@@ -3,6 +3,7 @@ import { tapResponse } from '@ngrx/operators';
 import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, pipe, tap } from 'rxjs';
+import { CreateTask } from "../components/task-form-modal/task-form-modal.service";
 import { Task } from "../models/task.model";
 import { TaskApiService } from "./task-fake-api.service";
 
@@ -75,11 +76,18 @@ export class TaskStoreService {
         )
     );
 
-    addTask = rxMethod<Task>(
+    addTask = rxMethod<CreateTask>(
         pipe(
             tap(() => patchState(this.state, { isLoading: true })),
-            exhaustMap((task) =>
-                this.taskApiService.saveTasks([...this.state.tasks(), task]).pipe(
+            exhaustMap((newTask) => {
+                const task: Task = {
+                    ...newTask,
+                    // FE should not be responsible for generating IDs, setting the createdAt and status while creating new Task
+                    id: crypto.randomUUID(),
+                    createdAt: new Date().toISOString(),
+                    status: 'Todo',
+                };
+                return this.taskApiService.saveTasks([...this.state.tasks(), task]).pipe(
                     tapResponse({
                         next: () => {
                             const updatedTasks = [...this.state.tasks(), task];
@@ -89,6 +97,7 @@ export class TaskStoreService {
                         finalize: () => patchState(this.state, { isLoading: false }),
                     })
                 )
+            }
             )
         )
     );
