@@ -1,0 +1,8 @@
+
+  @for (snack of snacks; track snack.index) {
+    <div class="snackbar" [ngClass]="snack.type">
+      {{ snack.text }}
+      <button class="close-btn" (click)="close(snack.index)" aria-label="Close">&times;</button>
+    </div>
+  }
+

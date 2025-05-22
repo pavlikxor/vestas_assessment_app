@@ -1,8 +1,10 @@
+import { HttpErrorResponse } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { tapResponse } from '@ngrx/operators';
 import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, pipe, tap } from 'rxjs';
+import { NotificationService } from "../components/notification/notification.service";
 import { CreateTask } from "../components/task-form-modal/task-form-modal.service";
 import { Task } from "../models/task.model";
 import { TaskApiService } from "./task-fake-api.service";
@@ -17,6 +19,7 @@ const initialState: TasksState = {
 @Injectable({ providedIn: 'root' })
 export class TaskStoreService {
     private readonly taskApiService = inject(TaskApiService);
+    private readonly notificationService = inject(NotificationService);
     private readonly state = signalState(initialState);
 
     readonly tasks = this.state.tasks;
@@ -28,8 +31,15 @@ export class TaskStoreService {
             exhaustMap(() => this.taskApiService.getTasks().pipe(
                 tapResponse({
                     next: (tasks) => patchState(this.state, { tasks }),
-                    error: console.error,
-                    finalize: () => patchState(this.state, { isLoading: false }),
+                    error: (err: HttpErrorResponse) => {
+                        this.notificationService.error(
+                            'Failed to load tasks: ' + (err?.message || err?.error || err)
+                        );
+                    },
+                    finalize: () => {
+                        patchState(this.state, { isLoading: false });
+                        this.notificationService.success('Tasks loaded successfully');
+                    },
                 })
             )
             )
@@ -48,8 +58,15 @@ export class TaskStoreService {
                             const updatedTasks = this.state.tasks().map(t => t.id === updatedTask.id ? updatedTask : t);
                             patchState(this.state, { tasks: updatedTasks });
                         },
-                        error: console.error,
-                        finalize: () => patchState(this.state, { isLoading: false }),
+                        error: (err: HttpErrorResponse) => {
+                            this.notificationService.error(
+                                `Failed to update task "${updatedTask.name}": ` + (err?.message || err?.error || err)
+                            );
+                        },
+                        finalize: () => {
+                            patchState(this.state, { isLoading: false });
+                            this.notificationService.success(`Task "${updatedTask.name}" updated successfully`);
+                        },
                     })
                 )
             )
@@ -59,8 +76,9 @@ export class TaskStoreService {
     updateTaskStatus = rxMethod<{ id: string, newStatus: Task['status'] }>(
         pipe(
             tap(() => patchState(this.state, { isLoading: true })),
-            exhaustMap(({ id, newStatus }) =>
-                this.taskApiService.saveTasks(
+            exhaustMap(({ id, newStatus }) => {
+                const task = this.state.tasks().find(t => t.id === id);
+                return this.taskApiService.saveTasks(
                     this.state.tasks().map(t => t.id === id ? { ...t, status: newStatus } : t)
                 ).pipe(
                     tapResponse({
@@ -68,11 +86,18 @@ export class TaskStoreService {
                             const updatedTasks = this.state.tasks().map(t => t.id === id ? { ...t, status: newStatus } : t);
                             patchState(this.state, { tasks: updatedTasks });
                         },
-                        error: console.error,
-                        finalize: () => patchState(this.state, { isLoading: false }),
+                        error: (err: HttpErrorResponse) => {
+                            this.notificationService.error(
+                                `Failed to update status for task "${task?.name ?? id}": ` + (err?.message || err?.error || err)
+                            );
+                        },
+                        finalize: () => {
+                            patchState(this.state, { isLoading: false });
+                            this.notificationService.success(`Task "${task?.name ?? id}" status updated successfully`);
+                        },
                     })
                 )
-            )
+            })
         )
     );
 
@@ -93,8 +118,15 @@ export class TaskStoreService {
                             const updatedTasks = [...this.state.tasks(), task];
                             patchState(this.state, { tasks: updatedTasks });
                         },
-                        error: console.error,
-                        finalize: () => patchState(this.state, { isLoading: false }),
+                        error: (err: HttpErrorResponse) => {
+                            this.notificationService.error(
+                                `Failed to add task "${newTask.name}": ` + (err?.message || err?.error || err)
+                            );
+                        },
+                        finalize: () => {
+                            patchState(this.state, { isLoading: false });
+                            this.notificationService.success(`Task "${newTask.name}" added successfully`);
+                        },
                     })
                 )
             }
@@ -105,117 +137,26 @@ export class TaskStoreService {
     deleteTask = rxMethod<string>(
         pipe(
             tap(() => patchState(this.state, { isLoading: true })),
-            exhaustMap((id) =>
-                this.taskApiService.saveTasks(this.state.tasks().filter(t => t.id !== id)).pipe(
+            exhaustMap((id) => {
+                const task = this.state.tasks().find(t => t.id === id);
+                return this.taskApiService.saveTasks(this.state.tasks().filter(t => t.id !== id)).pipe(
                     tapResponse({
                         next: () => {
                             const updatedTasks = this.state.tasks().filter(t => t.id !== id);
                             patchState(this.state, { tasks: updatedTasks });
                         },
-                        error: console.error,
-                        finalize: () => patchState(this.state, { isLoading: false }),
+                        error: (err: HttpErrorResponse) => {
+                            this.notificationService.error(
+                                `Failed to delete task "${task?.name ?? id}": ` + (err?.message || err?.error || err)
+                            );
+                        },
+                        finalize: () => {
+                            patchState(this.state, { isLoading: false });
+                            this.notificationService.success(`Task "${task?.name ?? id}" deleted successfully`);
+                        },
                     })
                 )
-            )
+            })
         )
     );
 }
-
-// export const taskStore = signalStore(
-//   { providedIn: 'root' },
-//   withState(() => {
-//     const taskApiService = inject(TaskApiService);
-//     return {
-//       tasks: taskApiService.getStoredTasks() as Task[],
-//       filter: '',
-//     };
-//   }),
-//   withMethods(state => {
-//     const taskApiService = inject(TaskApiService);
-
-//     return {
-//       setFilter(filter: string) {
-//         state.filter.set(filter);
-//       },
-//       addTask(task: Task) {
-//         const updated = [...state.tasks(), task];
-//         taskApiService.saveTasks(updated);
-//         state.tasks.set(updated);
-//       },
-//       deleteTask(id: string) {
-//         const updated = state.tasks().filter(t => t.id !== id);
-//         taskApiService.saveTasks(updated);
-//         state.tasks.set(updated);
-//       },
-//       updateTask(updatedTask: Task) {
-//         const updated = state.tasks().map(t => t.id === updatedTask.id ? updatedTask : t);
-//         taskApiService.saveTasks(updated);
-//         state.tasks.set(updated);
-//       },
-//       updateStatus(id: string, newStatus: Task['status']) {
-//         const updated = state.tasks().map(t => t.id === id ? { ...t, status: newStatus } : t);
-//         taskApiService.saveTasks(updated);
-//         state.tasks.set(updated);
-//       },
-//       filteredTasks() {
-//         const filter = state.filter().toLowerCase();
-//         return state.tasks().filter(task =>
-//           task.name.toLowerCase().includes(filter) || task.status.toLowerCase().includes(filter)
-//         );
-//       },
-//       tasks: () => state.tasks(),
-//       filter: () => state.filter()
-//     };
-//   })
-// );
-
-
-// @Injectable({ providedIn: 'root' })
-// export class TaskStoreService {
-//     private taskApiService = inject(TaskApiService)
-//     private tasks = signal<Task[]>(this.taskApiService.getStoredTasks());
-//     private filter = signal<string>('');
-
-//     getTasks(): Task[] {
-//         return this.tasks();
-//     }
-
-//     getFilter(): string {
-//         return this.filter();
-//     }
-
-//     setFilter(value: string): void {
-//         this.filter.set(value);
-//     }
-
-//     filteredTasks(): Task[] {
-//         const filter = this.filter().toLowerCase();
-//         return this.tasks().filter(task =>
-//             task.name.toLowerCase().includes(filter) || task.status.toLowerCase().includes(filter)
-//         );
-//     }
-
-//     addTask(task: Task): void {
-//         const updated = [...this.tasks(), task];
-//         this.taskApiService.saveTasks(updated);
-//         this.tasks.set(updated);
-//     }
-
-//     deleteTask(id: string): void {
-//         const updated = this.tasks().filter(t => t.id !== id);
-//         this.taskApiService.saveTasks(updated);
-//         this.tasks.set(updated);
-//     }
-
-//     updateTask(updated: Task) {
-//         const newList = this.tasks().map(t => t.id === updated.id ? updated : t);
-//         this.taskApiService.saveTasks(newList);
-//         this.tasks.set(newList);
-//     }
-
-//     updateStatus(id: string, newStatus: Task['status']): void {
-//         const updated = this.tasks().map(t => t.id === id ? { ...t, status: newStatus } : t);
-//         this.taskApiService.saveTasks(updated);
-//         this.tasks.set(updated);
-//     }
-// }
