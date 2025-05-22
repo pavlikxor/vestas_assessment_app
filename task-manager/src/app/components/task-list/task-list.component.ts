@@ -16,7 +16,7 @@ export class TaskListComponent implements OnInit {
   taskStoreService = inject(TaskStoreService)
   private confirmModalService = inject(ConfirmModalService)
   private taskFormModalService = inject(TaskFormModalService)
-  readonly destroyRef = inject(DestroyRef);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     this.taskStoreService.loadTasks();
