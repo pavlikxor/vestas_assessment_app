@@ -1,24 +1,21 @@
-import { Component, input, output } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { ConfirmModalService } from './confirm-modal.service';
 
 @Component({
   selector: 'app-confirm-modal',
-  imports: [],
+  imports: [AsyncPipe],
   templateUrl: './confirm-modal.component.html',
-  styleUrl: './confirm-modal.component.scss'
 })
-export class TaskDeleteModalComponent {
-
-  message = input<string>('Are you sure');
-  confirmText = input<string>('Confirm')
-  cancelText = input<string>('Cancel')
-  confirmed = output<void>();
-  cancelled = output<void>();
+export class ConfirmModalComponent {
+  isOpen = false
+  confirmModalService = inject(ConfirmModalService)
 
   onConfirm() {
-    this.confirmed.emit();
+    this.confirmModalService.close(true);
   }
 
   onCancel() {
-    this.cancelled.emit();
+    this.confirmModalService.close(false);
   }
 }

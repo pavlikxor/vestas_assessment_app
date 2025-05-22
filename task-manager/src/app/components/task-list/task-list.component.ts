@@ -1,40 +1,39 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { Task } from '../../models/task.model';
+import { Task, TaskStatus } from '../../models/task.model';
 import { TaskStoreService } from '../../services/task-store.service';
-import { TaskDeleteModalComponent } from '../confirm-modal/confirm-modal.component';
+import { ConfirmModalService } from '../confirm-modal/confirm-modal.service';
 import { TaskFormModalComponent } from '../task-form-modal/task-form-modal.component';
 
 @Component({
   selector: 'app-task-list',
-  imports: [TaskDeleteModalComponent, TaskFormModalComponent, DatePipe],
+  imports: [TaskFormModalComponent, DatePipe],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss'
 })
-export class TaskListComponent implements OnInit{
-
+export class TaskListComponent implements OnInit {
+  taskStoreService = inject(TaskStoreService)
+  confirmModalService = inject(ConfirmModalService)
   ngOnInit(): void {
     this.taskStoreService.loadTasks();
   }
-
-
-  taskStoreService = inject(TaskStoreService)
 
   showConfirm = false;
   taskToDelete: Task | null = null;
   showTaskModal = false;
   taskBeingEdited: Task | null = null;
 
+  updateStatus(id: string, newStatus: TaskStatus): void {
+    this.taskStoreService.updateTaskStatus({ id, newStatus })
+  }
+
   confirmDelete(task: Task) {
     this.taskToDelete = task;
     this.showConfirm = true;
   }
 
-  handleDelete() {
-    // if (this.taskToDelete) {
-    //   this.taskStoreService.deleteTask(this.taskToDelete.id);
-    // }
-    // this.closeConfirmModal();
+  handleDelete(taskToDelete: Task) {
+    this.confirmModalService.open({ message: 'Are you sure you want to delete the task: ' + taskToDelete.name + '?' }).subscribe()
   }
 
   closeConfirmModal() {

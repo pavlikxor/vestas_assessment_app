@@ -1,7 +1,3 @@
-@if(showConfirm&&taskToDelete){
-<app-confirm-modal [message]="'Are you sure you want to delete the task: ' + taskToDelete.name + '?'"
-    (confirmed)="handleDelete()" (cancelled)="closeConfirmModal()">
-</app-confirm-modal>}
 
 @if(showTaskModal){
 <app-task-form-modal [task]="taskBeingEdited" (closeModal)="closeTaskModal()">
@@ -15,13 +11,13 @@
     <p class="text-sm text-gray-500">Status: {{ task.status }} | Created: {{ task.createdAt | date }}</p>
     <div class="mt-2 space-x-2">
         @if(task.status === 'Todo'){
-        <!-- <button (click)="taskStoreService.updateStatus(task.id, 'InProgress')" class="btn">Start</button> -->
+        <button (click)="updateStatus(task.id, 'InProgress')" class="btn">Start</button>
         }
         @if(task.status === 'InProgress'){
-        <!-- <button (click)="taskStoreService.updateStatus(task.id, 'Completed')" class="btn">Complete</button> -->
+        <button (click)="updateStatus(task.id, 'Completed')" class="btn">Complete</button>
         }
         <button (click)="openTaskModal(task)" class="btn btn-danger">Edit</button>
-        <button (click)="confirmDelete(task)" class="btn btn-danger">
+        <button (click)="handleDelete(task)" class="btn btn-danger">
             Delete
         </button>
     </div>
