@@ -25,24 +25,32 @@ export class TaskStoreService {
     readonly tasks = this.state.tasks;
     readonly isLoading = this.state.isLoading;
 
-    loadTasks = rxMethod<void>(
+    loadTasks = rxMethod<string | void>(
         pipe(
             tap(() => patchState(this.state, { isLoading: true })),
-            exhaustMap(() => this.taskApiService.getTasks().pipe(
-                tapResponse({
-                    next: (tasks) => patchState(this.state, { tasks }),
-                    error: (err: HttpErrorResponse) => {
-                        this.notificationService.error(
-                            'Failed to load tasks: ' + (err?.message || err?.error || err)
-                        );
-                    },
-                    finalize: () => {
-                        patchState(this.state, { isLoading: false });
-                        this.notificationService.success('Tasks loaded successfully');
-                    },
-                })
-            )
-            )
+            exhaustMap((filterArg) => {
+                const filter = (typeof filterArg === 'string' ? filterArg : '').toLowerCase();
+                return this.taskApiService.getTasks().pipe(
+                    tapResponse({
+                        next: (tasks) => {
+                            const filtered = tasks.filter(task =>
+                                task.name.toLowerCase().includes(filter) ||
+                                task.status.toLowerCase().includes(filter)
+                            );
+                            patchState(this.state, { tasks: filtered });
+                        },
+                        error: (err: HttpErrorResponse) =>
+                            this.notificationService.error(
+                                'Failed to load tasks: ' + (err?.message || err?.error || err)
+                            )
+                        ,
+                        finalize: () => {
+                            patchState(this.state, { isLoading: false });
+                            this.notificationService.success('Tasks loaded successfully');
+                        },
+                    })
+                );
+            })
         )
     );
 
@@ -58,11 +66,11 @@ export class TaskStoreService {
                             const updatedTasks = this.state.tasks().map(t => t.id === updatedTask.id ? updatedTask : t);
                             patchState(this.state, { tasks: updatedTasks });
                         },
-                        error: (err: HttpErrorResponse) => {
+                        error: (err: HttpErrorResponse) =>
                             this.notificationService.error(
                                 `Failed to update task "${updatedTask.name}": ` + (err?.message || err?.error || err)
-                            );
-                        },
+                            )
+                        ,
                         finalize: () => {
                             patchState(this.state, { isLoading: false });
                             this.notificationService.success(`Task "${updatedTask.name}" updated successfully`);
@@ -86,11 +94,11 @@ export class TaskStoreService {
                             const updatedTasks = this.state.tasks().map(t => t.id === id ? { ...t, status: newStatus } : t);
                             patchState(this.state, { tasks: updatedTasks });
                         },
-                        error: (err: HttpErrorResponse) => {
+                        error: (err: HttpErrorResponse) =>
                             this.notificationService.error(
                                 `Failed to update status for task "${task?.name ?? id}": ` + (err?.message || err?.error || err)
-                            );
-                        },
+                            )
+                        ,
                         finalize: () => {
                             patchState(this.state, { isLoading: false });
                             this.notificationService.success(`Task "${task?.name ?? id}" status updated successfully`);
@@ -118,11 +126,11 @@ export class TaskStoreService {
                             const updatedTasks = [...this.state.tasks(), task];
                             patchState(this.state, { tasks: updatedTasks });
                         },
-                        error: (err: HttpErrorResponse) => {
+                        error: (err: HttpErrorResponse) =>
                             this.notificationService.error(
                                 `Failed to add task "${newTask.name}": ` + (err?.message || err?.error || err)
-                            );
-                        },
+                            )
+                        ,
                         finalize: () => {
                             patchState(this.state, { isLoading: false });
                             this.notificationService.success(`Task "${newTask.name}" added successfully`);
@@ -145,11 +153,11 @@ export class TaskStoreService {
                             const updatedTasks = this.state.tasks().filter(t => t.id !== id);
                             patchState(this.state, { tasks: updatedTasks });
                         },
-                        error: (err: HttpErrorResponse) => {
+                        error: (err: HttpErrorResponse) =>
                             this.notificationService.error(
                                 `Failed to delete task "${task?.name ?? id}": ` + (err?.message || err?.error || err)
-                            );
-                        },
+                            )
+                        ,
                         finalize: () => {
                             patchState(this.state, { isLoading: false });
                             this.notificationService.success(`Task "${task?.name ?? id}" deleted successfully`);

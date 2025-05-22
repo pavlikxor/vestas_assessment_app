@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Task } from '../../models/task.model';
 import { CreateTask, TaskFormModalService } from './task-form-modal.service';
@@ -8,6 +9,7 @@ import { CreateTask, TaskFormModalService } from './task-form-modal.service';
   imports: [ReactiveFormsModule],
   templateUrl: './task-form-modal.component.html',
 })
+
 export class TaskFormModalComponent {
   isOpen = signal(false);
   task = signal<Task | null>(null);
@@ -19,9 +21,12 @@ export class TaskFormModalComponent {
   })
 
   private taskFormModalService = inject(TaskFormModalService);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
-    this.taskFormModalService.data$.subscribe((data) => {
+    this.taskFormModalService.data$.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((data) => {
       this.isOpen.set(!!data);
       if (data?.task) {
         this.task.set(data.task);

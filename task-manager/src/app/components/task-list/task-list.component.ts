@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Task, TaskStatus } from '../../models/task.model';
 import { TaskStoreService } from '../../services/task-store.service';
 import { ConfirmModalService } from '../confirm-modal/confirm-modal.service';
@@ -10,10 +11,12 @@ import { TaskFormModalService } from '../task-form-modal/task-form-modal.service
   imports: [DatePipe],
   templateUrl: './task-list.component.html',
 })
+
 export class TaskListComponent implements OnInit {
   taskStoreService = inject(TaskStoreService)
   private confirmModalService = inject(ConfirmModalService)
   private taskFormModalService = inject(TaskFormModalService)
+  readonly destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     this.taskStoreService.loadTasks();
@@ -24,11 +27,15 @@ export class TaskListComponent implements OnInit {
   }
 
   handleDelete(taskToDelete: Task) {
-    this.confirmModalService.open({ message: 'Are you sure you want to delete the task: ' + taskToDelete.name + '?' }).subscribe(isConfirmed => { if (isConfirmed) { this.taskStoreService.deleteTask(taskToDelete.id) } });
+    this.confirmModalService.open({ message: 'Are you sure you want to delete the task: ' + taskToDelete.name + '?' }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(isConfirmed => { if (isConfirmed) { this.taskStoreService.deleteTask(taskToDelete.id) } });
   }
 
   handleEdit(task: Task) {
-    this.taskFormModalService.open(task).subscribe(updatedTask => {
+    this.taskFormModalService.open(task).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(updatedTask => {
       if (updatedTask && 'id' in updatedTask) {
         this.taskStoreService.updateTask(updatedTask);
       }
