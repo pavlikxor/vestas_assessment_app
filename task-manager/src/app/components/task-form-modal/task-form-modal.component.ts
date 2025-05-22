@@ -1,5 +1,5 @@
 import { Component, inject, input, output } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Task } from '../../models/task.model';
 import { TaskStoreService } from '../../services/task-store.service';
 
@@ -29,13 +29,13 @@ export class TaskFormModalComponent {
   }
 
   save() {
-    const taskValue = this.task();
+    const task = this.task();
     const formValue = this.taskForm.value;
     const name = formValue.name?.trim()
     if (name) {
-      if (taskValue) {
+      if (task) {
         const updatedTask: Task = {
-          ...taskValue,
+          ...task,
           name,
           description: formValue.description?.trim()
         };

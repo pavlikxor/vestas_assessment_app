@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Task } from '../../models/task.model';
 import { TaskStoreService } from '../../services/task-store.service';
 import { TaskDeleteModalComponent } from '../confirm-modal/confirm-modal.component';
@@ -11,7 +11,13 @@ import { TaskFormModalComponent } from '../task-form-modal/task-form-modal.compo
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss'
 })
-export class TaskListComponent {
+export class TaskListComponent implements OnInit{
+
+  ngOnInit(): void {
+    this.taskStoreService.loadTasks();
+  }
+
+
   taskStoreService = inject(TaskStoreService)
 
   showConfirm = false;
@@ -25,10 +31,10 @@ export class TaskListComponent {
   }
 
   handleDelete() {
-    if (this.taskToDelete) {
-      this.taskStoreService.deleteTask(this.taskToDelete.id);
-    }
-    this.closeConfirmModal();
+    // if (this.taskToDelete) {
+    //   this.taskStoreService.deleteTask(this.taskToDelete.id);
+    // }
+    // this.closeConfirmModal();
   }
 
   closeConfirmModal() {
