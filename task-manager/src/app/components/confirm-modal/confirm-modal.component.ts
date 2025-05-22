@@ -1,15 +1,15 @@
-import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { ConfirmModalService } from './confirm-modal.service';
 
 @Component({
   selector: 'app-confirm-modal',
-  imports: [AsyncPipe],
+  imports: [],
   templateUrl: './confirm-modal.component.html',
 })
 export class ConfirmModalComponent {
-  isOpen = false
-  confirmModalService = inject(ConfirmModalService)
+  modalData = computed(() => this.confirmModalService.data());
+
+  private confirmModalService = inject(ConfirmModalService)
 
   onConfirm() {
     this.confirmModalService.close(true);

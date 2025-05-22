@@ -18,8 +18,6 @@ export class TaskListComponent implements OnInit {
     this.taskStoreService.loadTasks();
   }
 
-  showConfirm = false;
-  taskToDelete: Task | null = null;
   showTaskModal = false;
   taskBeingEdited: Task | null = null;
 
@@ -27,18 +25,8 @@ export class TaskListComponent implements OnInit {
     this.taskStoreService.updateTaskStatus({ id, newStatus })
   }
 
-  confirmDelete(task: Task) {
-    this.taskToDelete = task;
-    this.showConfirm = true;
-  }
-
   handleDelete(taskToDelete: Task) {
-    this.confirmModalService.open({ message: 'Are you sure you want to delete the task: ' + taskToDelete.name + '?' }).subscribe()
-  }
-
-  closeConfirmModal() {
-    this.showConfirm = false;
-    this.taskToDelete = null;
+    this.confirmModalService.open({ message: 'Are you sure you want to delete the task: ' + taskToDelete.name + '?' }).subscribe(isConfirmed => { if (isConfirmed) { this.taskStoreService.deleteTask(taskToDelete.id) } });
   }
 
   openTaskModal(task: Task | null = null) {
