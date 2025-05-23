@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Task } from '../../models/task.model';
@@ -10,7 +10,7 @@ import { CreateTask, TaskFormModalService } from './task-form-modal.service';
   templateUrl: './task-form-modal.component.html',
 })
 
-export class TaskFormModalComponent {
+export class TaskFormModalComponent implements OnInit {
   isOpen = signal(false);
   task = signal<Task | null>(null);
   nameControl = new FormControl<string | null>(null, Validators.required)

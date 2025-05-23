@@ -9,7 +9,7 @@ import { CreateTask } from "../components/task-form-modal/task-form-modal.servic
 import { Task } from "../models/task.model";
 import { TaskApiService } from "./task-fake-api.service";
 
-type TasksState = { tasks: Task[]; isLoading: boolean };
+interface TasksState { tasks: Task[]; isLoading: boolean }
 
 const initialState: TasksState = {
     tasks: [],
