@@ -13,6 +13,28 @@ Simple Task Manager application using Angular and Tailwind CSS.
 - User-friendly empty state for task list
 - Loader/spinner overlay shown during loading operations
 
+## Styles
+
+This project uses [Tailwind CSS](https://tailwindcss.com/) as the main styling library.
+
+**Current Tailwind CSS version:**  
+`4.1.7` (see `package.json` for the exact version used in this project)
+
+### Tailwind CSS Browser Support
+
+Tailwind CSS 4.x supports the following browsers:
+
+- Chrome (114+)
+- Edge (114+)
+- Firefox (113+)
+- Safari (16.4+)
+- Opera (100+)
+- iOS Safari (16.4+)
+- Chrome for Android (114+)
+- Firefox for Android (113+)
+
+For more details, see the [official Tailwind CSS browser support documentation](https://tailwindcss.com/docs/browser-support).
+
 ## Getting Started
 
 ### Prerequisites

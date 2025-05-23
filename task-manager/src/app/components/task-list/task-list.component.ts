@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Task, TaskStatus } from '../../models/task.model';
@@ -8,7 +8,7 @@ import { TaskFormModalService } from '../task-form-modal/task-form-modal.service
 
 @Component({
   selector: 'app-task-list',
-  imports: [DatePipe],
+  imports: [DatePipe, NgClass],
   templateUrl: './task-list.component.html',
 })
 

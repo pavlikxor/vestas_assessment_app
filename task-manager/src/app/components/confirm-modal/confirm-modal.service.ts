@@ -10,16 +10,18 @@ export interface ConfirmModalData {
 @Injectable({ providedIn: 'root' })
 export class ConfirmModalService {
     data = signal<ConfirmModalData | null>(null);
-    private currentClose$= new Subject<boolean>();
+    private currentClose$?: Subject<boolean>;
 
     open(data: ConfirmModalData): Observable<boolean> {
         this.data.set(data);
+        this.currentClose$ = new Subject<boolean>();
         return this.currentClose$.asObservable();
     }
 
     close(result: boolean) {
         this.data.set(null);
-        this.currentClose$.next(result);
-        this.currentClose$.complete();
+        this.currentClose$?.next(result);
+        this.currentClose$?.complete();
+        this.currentClose$ = undefined;
     }
 }

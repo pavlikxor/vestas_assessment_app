@@ -46,7 +46,12 @@ export class TaskStoreService {
                         ,
                         finalize: () => {
                             patchState(this.state, { isLoading: false });
-                            this.notificationService.success('Tasks loaded successfully');
+                            const count = this.state.tasks().length;
+                            this.notificationService.success(
+                                count === 0
+                                  ? 'No tasks found.'
+                                  : `Loaded ${count} task${count === 1 ? '' : 's'} successfully.`
+                            );
                         },
                     })
                 );

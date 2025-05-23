@@ -2,16 +2,51 @@
   <div class="mb-2 p-4 border rounded bg-gray-50">
     <h3 class="text-lg font-semibold">{{ task.name }}</h3>
     <p>{{ task.description }}</p>
-    <p class="text-sm text-gray-500">Status: {{ task.status }} | Created: {{ task.createdAt | date }}</p>
+    <p>Status:
+      <span
+        [ngClass]="{
+          'bg-gray-200 text-gray-800': task.status === 'Todo',
+          'bg-blue-100 text-blue-800': task.status === 'InProgress',
+          'bg-green-100 text-green-800': task.status === 'Completed'
+        }"
+        class="mr-1 px-2 py-0.5 rounded font-semibold"
+      >
+        @switch (task.status) {
+          @case('InProgress') { In progress }
+          @case('Todo') { Todo }
+          @case('Completed') { Completed }
+          @default { {{ task.status }} }
+        }
+      </span>
+    </p>
+    <p>Created: {{ task.createdAt | date : 'dd/MM/yyyy' }}</p>
     <div class="mt-2 space-x-2">
-      @if(task.status === 'Todo'){
-        <button (click)="updateStatus(task.id, 'InProgress')" class="btn">Start</button>
-      }
-      @if(task.status === 'InProgress'){
-        <button (click)="updateStatus(task.id, 'Completed')" class="btn">Complete</button>
-      }
-      <button (click)="handleEdit(task)" class="btn btn-danger">Edit</button>
-      <button (click)="handleDelete(task)" class="btn btn-danger">
+        @if(task.status === 'Todo'){
+          <button
+            (click)="updateStatus(task.id, 'InProgress')"
+            class="px-3 py-1 rounded bg-green-500 hover:bg-green-600 text-white transition-colors"
+          >
+          Start
+        </button>
+        }
+        @if(task.status === 'InProgress'){
+          <button
+            (click)="updateStatus(task.id, 'Completed')"
+            class="px-3 py-1 rounded bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+          >
+          Complete
+        </button>
+        }
+        <button
+          (click)="handleEdit(task)"
+          class="px-3 py-1 rounded bg-yellow-400 hover:bg-yellow-500 text-black transition-colors"
+        >
+        Edit
+        </button>
+        <button
+          (click)="handleDelete(task)"
+          class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white transition-colors"
+        >
         Delete
       </button>
     </div>
