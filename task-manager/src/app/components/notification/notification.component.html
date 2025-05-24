@@ -1,10 +1,12 @@
 @for (snack of notificationService.messagesList(); track snack.index) {
-  <div
-    class="snackbar rounded p-3 flex justify-between items-center text-sm"
-    [notificationSnackClass]="snack.type"
-  >
+  <div [ngClass]="{
+            'bg-green-500 text-white': snack.type === 'success',
+            'bg-blue-500 text-gray-100': snack.type === 'info',
+            'bg-red-600 text-gray-200': snack.type === 'error',
+            'bg-yellow-400 text-dark': snack.type === 'warning'
+          }" 
+        class="snackbar rounded p-3 flex justify-between items-center text-sm">
     {{ snack.text }}
     <button class="close-btn" (click)="close(snack.index)" aria-label="Close">&times;</button>
   </div>
 }
-

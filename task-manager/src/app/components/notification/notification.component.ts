@@ -1,14 +1,14 @@
+import { NgClass } from '@angular/common';
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
-import { NotificationSnackClassDirective } from './notification-snack-class.directive';
 import { NotificationService } from './notification.service';
 
 const DURATION = 3000;
 
 @Component({
     selector: 'app-notification',
-    imports: [NotificationSnackClassDirective],
+    imports: [NgClass],
     templateUrl: './notification.component.html',
     styleUrls: ['./notification.component.scss']
 })
