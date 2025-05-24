@@ -3,10 +3,9 @@ import { Injectable, signal } from '@angular/core';
 export type NotificationType = 'success' | 'info' | 'warning' | 'error';
 
 export interface NotificationMessage {
-    index: number;
-    text: string;
-    type: NotificationType;
-    duration?: number;
+  index: number;
+  text: string;
+  type: NotificationType;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -36,9 +35,8 @@ export class NotificationService {
         this.messages.update(msgs => msgs.filter(msg => msg.index !== index));
     }
 
-    private show(text: string, type: NotificationType = 'info', duration = 2500,) {
+    private show(text: string, type: NotificationType = 'info',) {
         const index = ++this.counter;
-        this.messages.update(msgs => [...msgs, { index, text, type, duration }]);
-        return index;
+        this.messages.update(msgs => [...msgs, { index, text, type }]);
     }
 }

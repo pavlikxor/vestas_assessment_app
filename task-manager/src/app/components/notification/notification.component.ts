@@ -1,42 +1,30 @@
-import { NgClass } from '@angular/common';
-import { Component, effect, inject } from '@angular/core';
-import { NotificationMessage, NotificationService } from './notification.service';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { timer } from 'rxjs';
+import { NotificationSnackClassDirective } from './notification-snack-class.directive';
+import { NotificationService } from './notification.service';
+
+const DURATION = 3000;
 
 @Component({
     selector: 'app-notification',
-    imports: [NgClass],
+    imports: [NotificationSnackClassDirective],
     templateUrl: './notification.component.html',
     styleUrls: ['./notification.component.scss']
 })
-export class NotificationComponent {
-    private notificationService = inject(NotificationService);
+export class NotificationComponent implements OnInit {
+    notificationService = inject(NotificationService);
+    private destroyRef = inject(DestroyRef);
 
-    snacks: Omit<NotificationMessage, 'duration'>[] = [];
-    private timeouts = new Map<number, any>();
-
-    constructor() {
-        effect(() => {
-            const messages = this.notificationService.messagesList();
-            this.snacks = messages.map(msg => ({
-                index: msg.index,
-                text: msg.text,
-                type: msg.type
-            }));
-            for (const msg of messages) {
-                if (!this.timeouts.has(msg.index)) {
-                    const timeoutId = setTimeout(() => this.close(msg.index), msg.duration ?? 2500);
-                    this.timeouts.set(msg.index, timeoutId);
-                }
-            }
-        });
+    ngOnInit() {
+        for (const msg of this.notificationService.messagesList()) {
+            timer(DURATION)
+                .pipe(takeUntilDestroyed(this.destroyRef))
+                .subscribe(() => this.close(msg.index));
+        }
     }
 
     close(index: number) {
         this.notificationService.remove(index);
-        const timeoutId = this.timeouts.get(index);
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-            this.timeouts.delete(index);
-        }
     }
 }
