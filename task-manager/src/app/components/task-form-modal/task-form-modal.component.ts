@@ -1,8 +1,8 @@
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Task } from '../../models/task.model';
-import { CreateTask, TaskFormModalService } from './task-form-modal.service';
+import { CreateTask, Task } from '../../models/task.model';
+import { TaskFormModalService } from './task-form-modal.service';
 
 @Component({
   selector: 'app-task-form-modal',

@@ -1,7 +1,7 @@
 import { DatePipe, NgClass } from '@angular/common';
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Task, TaskStatus } from '../../models/task.model';
+import { Task, TASK_STATUS_LABELS, TaskStatus } from '../../models/task.model';
 import { TaskStoreService } from '../../services/task-store.service';
 import { ConfirmModalService } from '../confirm-modal/confirm-modal.service';
 import { TaskFormModalService } from '../task-form-modal/task-form-modal.service';
@@ -13,6 +13,7 @@ import { TaskFormModalService } from '../task-form-modal/task-form-modal.service
 })
 
 export class TaskListComponent implements OnInit {
+  statusLabels = TASK_STATUS_LABELS;
   taskStoreService = inject(TaskStoreService)
   private confirmModalService = inject(ConfirmModalService)
   private taskFormModalService = inject(TaskFormModalService)
@@ -22,7 +23,7 @@ export class TaskListComponent implements OnInit {
     this.taskStoreService.loadTasks();
   }
 
-  updateStatus(id: string, newStatus: TaskStatus): void {
+  handleUpdateStatus(id: string, newStatus: TaskStatus): void {
     this.taskStoreService.updateTaskStatus({ id, newStatus })
   }
 

@@ -5,8 +5,7 @@ import { patchState, signalState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, pipe, tap } from 'rxjs';
 import { NotificationService } from "../components/notification/notification.service";
-import { CreateTask } from "../components/task-form-modal/task-form-modal.service";
-import { Task } from "../models/task.model";
+import { CreateTask, Task, TASK_STATUS_LABELS, TaskStatus } from "../models/task.model";
 import { TaskApiService } from "./task-fake-api.service";
 
 interface TasksState { tasks: Task[]; isLoading: boolean }
@@ -33,10 +32,13 @@ export class TaskStoreService {
                 return this.taskApiService.getTasks().pipe(
                     tapResponse({
                         next: (tasks) => {
-                            const filtered = tasks.filter(task =>
-                                task.name.toLowerCase().includes(filter) ||
-                                task.status.toLowerCase().includes(filter)
-                            );
+                            const filtered = tasks.filter(task => {
+                                const statusString = TASK_STATUS_LABELS[task.status] || task.status;
+                                return (
+                                    task.name.toLowerCase().includes(filter) ||
+                                    statusString.toLowerCase().includes(filter)
+                                );
+                            });
                             patchState(this.state, { tasks: filtered });
                         },
                         error: (err: HttpErrorResponse) =>
@@ -86,7 +88,7 @@ export class TaskStoreService {
         )
     );
 
-    updateTaskStatus = rxMethod<{ id: string, newStatus: Task['status'] }>(
+    updateTaskStatus = rxMethod<{ id: string, newStatus: TaskStatus }>(
         pipe(
             tap(() => patchState(this.state, { isLoading: true })),
             exhaustMap(({ id, newStatus }) => {

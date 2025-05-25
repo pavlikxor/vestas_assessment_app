@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { Task } from '../../models/task.model';
+import { CreateTask, Task } from '../../models/task.model';
 
-export type CreateTask = Omit<Task, 'id' | 'createdAt' | 'status'>;
 type TaskModalResult = Task | CreateTask | false;
 
 @Injectable({ providedIn: 'root' })

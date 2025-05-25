@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, effect, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
 import { NotificationService } from './notification.service';
@@ -12,16 +12,18 @@ const DURATION = 3000;
     templateUrl: './notification.component.html',
     styleUrls: ['./notification.component.scss']
 })
-export class NotificationComponent implements OnInit {
+export class NotificationComponent {
     notificationService = inject(NotificationService);
     private destroyRef = inject(DestroyRef);
 
-    ngOnInit() {
-        for (const msg of this.notificationService.messagesList()) {
-            timer(DURATION)
-                .pipe(takeUntilDestroyed(this.destroyRef))
-                .subscribe(() => this.close(msg.index));
-        }
+    constructor() {
+        effect(() => {
+            for (const msg of this.notificationService.messagesList()) {
+                timer(DURATION)
+                    .pipe(takeUntilDestroyed(this.destroyRef))
+                    .subscribe(() => this.close(msg.index));
+            }
+        });
     }
 
     close(index: number) {

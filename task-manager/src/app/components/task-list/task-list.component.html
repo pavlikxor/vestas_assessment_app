@@ -11,19 +11,14 @@
         }"
         class="mr-1 px-2 py-0.5 rounded font-semibold"
       >
-        @switch (task.status) {
-          @case('InProgress') { In progress }
-          @case('Todo') { Todo }
-          @case('Completed') { Completed }
-          @default { {{ task.status }} }
-        }
+        {{ statusLabels[task.status] || task.status }}
       </span>
     </p>
     <p>Created: {{ task.createdAt | date : 'dd/MM/yyyy' }}</p>
     <div class="mt-2 space-x-2">
         @if(task.status === 'Todo'){
           <button
-            (click)="updateStatus(task.id, 'InProgress')"
+            (click)="handleUpdateStatus(task.id, 'InProgress')"
             class="px-3 py-1 rounded bg-green-500 hover:bg-green-600 text-white transition-colors"
           >
           Start
@@ -31,8 +26,8 @@
         }
         @if(task.status === 'InProgress'){
           <button
-            (click)="updateStatus(task.id, 'Completed')"
-            class="px-3 py-1 rounded bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+            (click)="handleUpdateStatus(task.id, 'Completed')"
+            class="px-3 py-1 rounded bg-blue-500 hover:bg-blue-700 text-white transition-colors"
           >
           Complete
         </button>
@@ -40,7 +35,7 @@
         <button
           (click)="handleEdit(task)"
           class="px-3 py-1 rounded bg-yellow-400 hover:bg-yellow-500 text-black transition-colors"
-        >
+          >
         Edit
         </button>
         <button
