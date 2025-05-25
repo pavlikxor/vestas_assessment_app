@@ -11,20 +11,28 @@ import { TaskStoreService } from './services/task-store.service';
 
 @Component({
   selector: 'app-root',
-  imports: [TaskFilterComponent, TaskListComponent, TaskFormModalComponent, ConfirmModalComponent, LoaderComponent, NotificationComponent],
+  imports: [
+    TaskFilterComponent,
+    TaskListComponent,
+    TaskFormModalComponent,
+    ConfirmModalComponent,
+    LoaderComponent,
+    NotificationComponent,
+  ],
   templateUrl: './app.component.html',
 })
-
 export class AppComponent {
   title = 'Task Manager';
 
-  private taskFormModalService = inject(TaskFormModalService)
-  private taskStoreService = inject(TaskStoreService)
+  private taskFormModalService = inject(TaskFormModalService);
+  private taskStoreService = inject(TaskStoreService);
   private destroyRef = inject(DestroyRef);
 
   openCreateModal() {
-    this.taskFormModalService.open().pipe(
-      takeUntilDestroyed(this.destroyRef)).subscribe(newTask => {
+    this.taskFormModalService
+      .open()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(newTask => {
         if (newTask) {
           this.taskStoreService.addTask(newTask);
         }

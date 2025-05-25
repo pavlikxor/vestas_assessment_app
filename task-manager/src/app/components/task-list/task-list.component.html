@@ -1,8 +1,9 @@
-@for(task of taskStoreService.tasks(); track $index){
+@for (task of taskStoreService.tasks(); track $index) {
   <div class="mb-2 p-4 border rounded bg-gray-50">
     <h3 class="text-lg font-semibold">{{ task.name }}</h3>
     <p>{{ task.description }}</p>
-    <p>Status:
+    <p>
+      Status:
       <span
         [ngClass]="{
           'bg-gray-200 text-gray-800': task.status === 'Todo',
@@ -11,42 +12,43 @@
         }"
         class="mr-1 px-2 py-0.5 rounded font-semibold"
       >
-        {{ statusLabels[task.status] || task.status }}
+        {{ task.status | taskStatusLabel }}
       </span>
     </p>
-    <p>Created: {{ task.createdAt | date : 'dd/MM/yyyy' }}</p>
+    <p>Created: {{ task.createdAt | date: 'dd/MM/yyyy' }}</p>
     <div class="mt-2 space-x-2">
-        @if(task.status === 'Todo'){
-          <button
-            (click)="handleUpdateStatus(task.id, 'InProgress')"
-            class="px-3 py-1 rounded bg-green-500 hover:bg-green-600 text-white transition-colors"
-          >
+      @if (task.status === 'Todo') {
+        <button
+          (click)="handleUpdateStatus(task.id, 'InProgress')"
+          class="px-3 py-1 rounded bg-green-500 hover:bg-green-600 text-white transition-colors"
+        >
           Start
         </button>
-        }
-        @if(task.status === 'InProgress'){
-          <button
-            (click)="handleUpdateStatus(task.id, 'Completed')"
-            class="px-3 py-1 rounded bg-blue-500 hover:bg-blue-700 text-white transition-colors"
-          >
+      }
+      @if (task.status === 'InProgress') {
+        <button
+          (click)="handleUpdateStatus(task.id, 'Completed')"
+          class="px-3 py-1 rounded bg-blue-500 hover:bg-blue-700 text-white transition-colors"
+        >
           Complete
         </button>
-        }
-        <button
-          (click)="handleEdit(task)"
-          class="px-3 py-1 rounded bg-yellow-400 hover:bg-yellow-500 text-black transition-colors"
-          >
+      }
+      <button
+        (click)="handleEdit(task)"
+        class="px-3 py-1 rounded bg-yellow-400 hover:bg-yellow-500 text-black transition-colors"
+      >
         Edit
-        </button>
-        <button
-          (click)="handleDelete(task)"
-          class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white transition-colors"
-        >
+      </button>
+      <button
+        (click)="handleDelete(task)"
+        class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white transition-colors"
+      >
         Delete
       </button>
     </div>
   </div>
-} @empty {
+}
+@empty {
   <div class="text-center text-gray-400 py-8">
     No tasks found. Try adding a new task or adjusting your search.
   </div>

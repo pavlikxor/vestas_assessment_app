@@ -1,6 +1,11 @@
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { CreateTask, Task } from '../../models/task.model';
 import { TaskFormModalService } from './task-form-modal.service';
 
@@ -9,43 +14,44 @@ import { TaskFormModalService } from './task-form-modal.service';
   imports: [ReactiveFormsModule],
   templateUrl: './task-form-modal.component.html',
 })
-
 export class TaskFormModalComponent implements OnInit {
   isOpen = signal(false);
   task = signal<Task | null>(null);
-  nameControl = new FormControl<string | null>(null, Validators.required)
-  descriptionControl = new FormControl<string | null>(null)
+  nameControl = new FormControl<string | null>(null, Validators.required);
+  descriptionControl = new FormControl<string | null>(null);
   taskForm = new FormGroup({
     name: this.nameControl,
-    description: this.descriptionControl
-  })
+    description: this.descriptionControl,
+  });
 
   private taskFormModalService = inject(TaskFormModalService);
   private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
-    this.taskFormModalService.data$.pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe((data) => {
-      this.isOpen.set(!!data);
-      if (data?.task) {
-        this.task.set(data.task);
-        this.taskForm.reset({ name: data.task.name, description: data.task.description || null });
-      }
-    });
+    this.taskFormModalService.data$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(data => {
+        this.isOpen.set(!!data);
+        if (data?.task) {
+          this.task.set(data.task);
+          this.taskForm.reset({
+            name: data.task.name,
+            description: data.task.description || null,
+          });
+        }
+      });
   }
-
 
   onSave() {
     const task = this.task();
     const formValue = this.taskForm.value;
-    const name = formValue.name?.trim()
+    const name = formValue.name?.trim();
     if (name) {
       if (task) {
         const updatedTask: Task = {
           ...task,
           name,
-          description: formValue.description?.trim()
+          description: formValue.description?.trim(),
         };
         this.taskFormModalService.close(updatedTask);
       } else {
@@ -55,13 +61,13 @@ export class TaskFormModalComponent implements OnInit {
         };
         this.taskFormModalService.close(newTask);
       }
-      this.resetModal()
+      this.resetModal();
     }
   }
 
   onCancel() {
     this.taskFormModalService.close(false);
-    this.resetModal()
+    this.resetModal();
   }
 
   private resetModal() {
