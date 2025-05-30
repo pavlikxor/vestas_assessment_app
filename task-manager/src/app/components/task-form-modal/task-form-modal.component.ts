@@ -1,5 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, effect, inject, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -14,7 +13,7 @@ import { TaskFormModalService } from './task-form-modal.service';
   imports: [ReactiveFormsModule],
   templateUrl: './task-form-modal.component.html',
 })
-export class TaskFormModalComponent implements OnInit {
+export class TaskFormModalComponent {
   isOpen = signal(false);
   task = signal<Task | null>(null);
   nameControl = new FormControl<string | null>(null, Validators.required);
@@ -25,21 +24,16 @@ export class TaskFormModalComponent implements OnInit {
   });
 
   private taskFormModalService = inject(TaskFormModalService);
-  private destroyRef = inject(DestroyRef);
 
-  ngOnInit() {
-    this.taskFormModalService.data$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(data => {
-        this.isOpen.set(!!data);
-        if (data?.task) {
-          this.task.set(data.task);
-          this.taskForm.reset({
-            name: data.task.name,
-            description: data.task.description || null,
-          });
-        }
+  constructor() {
+    effect(() => {
+      this.isOpen.set(!!this.taskFormModalService.data());
+      this.task.set(this.taskFormModalService.data()?.task ?? null);
+      this.taskForm.reset({
+        name: this.task()?.name ?? null,
+        description: this.task()?.description ?? null,
       });
+    });
   }
 
   onSave() {
